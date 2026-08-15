@@ -1,27 +1,15 @@
-"""
-MyLearnTracker - Personal Learning Goal Tracker API
-A simple REST API to track courses you want to learn
-"""
-
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import json
 import os
 from datetime import datetime
 
 app = Flask(__name__)
 
-# Configuration
-DATA_FILE = 'courses.json'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, 'courses.json')
 
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
 
 def load_courses():
-    """
-    Load courses from the JSON file.
-    If file doesn't exist, create an empty one.
-    """
     if not os.path.exists(DATA_FILE):
         # Create empty file if it doesn't exist
         with open(DATA_FILE, 'w') as f:
@@ -37,9 +25,6 @@ def load_courses():
 
 
 def save_courses(courses):
-    """
-    Save courses to the JSON file.
-    """
     try:
         with open(DATA_FILE, 'w') as f:
             json.dump(courses, f, indent=2)
@@ -50,19 +35,12 @@ def save_courses(courses):
 
 
 def get_next_id(courses):
-    """
-    Generate the next available ID for a new course.
-    """
     if not courses:
         return 1
     return max(course['id'] for course in courses) + 1
 
 
 def find_course_by_id(courses, course_id):
-    """
-    Find a course by its ID.
-    Returns the course and its index, or (None, -1) if not found.
-    """
     for index, course in enumerate(courses):
         if course['id'] == course_id:
             return course, index
@@ -70,10 +48,6 @@ def find_course_by_id(courses, course_id):
 
 
 def validate_course_data(data, required_fields):
-    """
-    Validate that required fields are present in the data.
-    Returns (is_valid, error_message)
-    """
     missing_fields = [field for field in required_fields if field not in data]
     
     if missing_fields:
@@ -87,15 +61,14 @@ def validate_course_data(data, required_fields):
     return True, None
 
 
-# ============================================================================
-# API ENDPOINTS
-# ============================================================================
 
 @app.route('/')
 def home():
-    """
-    Home endpoint - provides API information
-    """
+    return render_template('index.html')
+
+
+@app.route('/api')
+def api_info():
     return jsonify({
         'message': 'Welcome to MyLearnTracker API!',
         'version': '1.0',
@@ -111,10 +84,6 @@ def home():
 
 @app.route('/api/courses', methods=['GET'])
 def get_all_courses():
-    """
-    GET /api/courses
-    Retrieve all courses
-    """
     try:
         courses = load_courses()
         return jsonify({
@@ -131,10 +100,6 @@ def get_all_courses():
 
 @app.route('/api/courses/<int:course_id>', methods=['GET'])
 def get_course(course_id):
-    """
-    GET /api/courses/<id>
-    Retrieve a specific course by ID
-    """
     try:
         courses = load_courses()
         course, _ = find_course_by_id(courses, course_id)
@@ -158,16 +123,6 @@ def get_course(course_id):
 
 @app.route('/api/courses', methods=['POST'])
 def add_course():
-    """
-    POST /api/courses
-    Add a new course
-    
-    Required fields in JSON body:
-    - name: Course name
-    - description: Course description
-    - target_date: Target completion date (YYYY-MM-DD)
-    - status: Course status (Not Started, In Progress, Completed)
-    """
     try:
         # Get JSON data from request
         data = request.get_json()
@@ -226,18 +181,7 @@ def add_course():
 
 @app.route('/api/courses/<int:course_id>', methods=['PUT'])
 def update_course(course_id):
-    """
-    PUT /api/courses/<id>
-    Update an existing course
-    
-    You can update any of these fields:
-    - name
-    - description
-    - target_date
-    - status
-    """
     try:
-        # Get JSON data from request
         data = request.get_json()
         
         if not data:
@@ -246,7 +190,6 @@ def update_course(course_id):
                 'error': 'No data provided'
             }), 400
         
-        # Load existing courses
         courses = load_courses()
         course, index = find_course_by_id(courses, course_id)
         
@@ -256,7 +199,6 @@ def update_course(course_id):
                 'error': f'Course with ID {course_id} not found'
             }), 404
         
-        # Validate status if being updated
         if 'status' in data:
             is_valid, error_message = validate_course_data(data, [])
             if not is_valid:
@@ -265,7 +207,6 @@ def update_course(course_id):
                     'error': error_message
                 }), 400
         
-        # Update course fields
         if 'name' in data:
             course['name'] = data['name']
         if 'description' in data:
@@ -275,10 +216,8 @@ def update_course(course_id):
         if 'status' in data:
             course['status'] = data['status']
         
-        # Update the course in the list
         courses[index] = course
         
-        # Save to file
         if save_courses(courses):
             return jsonify({
                 'success': True,
@@ -305,7 +244,6 @@ def delete_course(course_id):
     Delete a course
     """
     try:
-        # Load existing courses
         courses = load_courses()
         course, index = find_course_by_id(courses, course_id)
         
@@ -315,10 +253,8 @@ def delete_course(course_id):
                 'error': f'Course with ID {course_id} not found'
             }), 404
         
-        # Remove the course
         deleted_course = courses.pop(index)
         
-        # Save to file
         if save_courses(courses):
             return jsonify({
                 'success': True,
@@ -338,9 +274,6 @@ def delete_course(course_id):
         }), 500
 
 
-# ============================================================================
-# BONUS ENDPOINTS (Optional enhancements)
-# ============================================================================
 
 @app.route('/api/courses/stats', methods=['GET'])
 def get_statistics():
@@ -386,7 +319,6 @@ def search_courses():
         
         courses = load_courses()
         
-        # Filter courses that match the search query
         results = [
             course for course in courses
             if search_query in course['name'].lower() or 
@@ -405,9 +337,6 @@ def search_courses():
         }), 500
 
 
-# ============================================================================
-# ERROR HANDLERS
-# ============================================================================
 
 @app.errorhandler(404)
 def not_found(error):
@@ -427,9 +356,6 @@ def internal_error(error):
     }), 500
 
 
-# ============================================================================
-# RUN THE APPLICATION
-# ============================================================================
 
 if __name__ == '__main__':
     print("=" * 60)
@@ -440,5 +366,4 @@ if __name__ == '__main__':
     print("=" * 60)
     print("\nPress CTRL+C to stop the server\n")
     
-    # Run the Flask app
     app.run(debug=True, host='0.0.0.0', port=5000)

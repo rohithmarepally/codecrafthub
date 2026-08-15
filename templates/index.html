@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeCraftHub: Your Learning Management Platform</title>
+   <meta property="og:image" content="https://bolt.new/static/og_default.png">
+   <link rel = "stylesheet" href="../static/css/page.css">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
+</head>
+  <body>
+
+    <header>
+      <h1>CodeCraftHub</h1>
+      <p>Your Learning Management Platform</p>
+    </header>
+
+    <div id="toast-container"></div>
+
+    <main>
+      <!-- Add Course Form -->
+      <div class="section-card">
+        <div class="section-title">Add New Course</div>
+        <form id="add-form" novalidate>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="add-name">Course Name <span style="color:var(--danger)">*</span></label>
+              <input id="add-name" type="text" placeholder="e.g. JavaScript Fundamentals" />
+              <div class="field-error" id="add-name-err"></div>
+            </div>
+            <div class="form-group">
+              <label for="add-status">Status <span style="color:var(--danger)">*</span></label>
+              <select id="add-status">
+                <option value="">Select status…</option>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+              <div class="field-error" id="add-status-err"></div>
+            </div>
+            <div class="form-group">
+              <label for="add-date">Target Date <span style="color:var(--danger)">*</span></label>
+              <input id="add-date" type="date" />
+              <div class="field-error" id="add-date-err"></div>
+            </div>
+            <div class="form-group full">
+              <label for="add-desc">Description <span style="color:var(--danger)">*</span></label>
+              <textarea id="add-desc" placeholder="Brief description of what this course covers…"></textarea>
+              <div class="field-error" id="add-desc-err"></div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="add-btn">
+              <span id="add-btn-text">Add Course</span>
+            </button>
+            <button type="button" class="btn btn-ghost" id="add-reset-btn">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Course List -->
+      <div class="section-card">
+        <div class="section-title">
+          All Courses
+          <span class="badge" id="course-count">0</span>
+          <button class="btn btn-ghost" id="refresh-btn" style="margin-left:auto;font-size:.8rem;padding:5px 12px;">
+            &#x21bb; Refresh
+          </button>
+        </div>
+
+        <div id="courses-area">
+          <div class="state-box">
+            <div class="state-icon">&#x23F3;</div>
+            <p>Loading courses…</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal-overlay" style="display:none;">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <span class="modal-title" id="modal-title">Edit Course</span>
+          <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+        </div>
+        <form id="edit-form" novalidate>
+          <input type="hidden" id="edit-id" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="edit-name">Course Name <span style="color:var(--danger)">*</span></label>
+              <input id="edit-name" type="text" />
+              <div class="field-error" id="edit-name-err"></div>
+            </div>
+            <div class="form-group">
+              <label for="edit-status">Status <span style="color:var(--danger)">*</span></label>
+              <select id="edit-status">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+              <div class="field-error" id="edit-status-err"></div>
+            </div>
+            <div class="form-group">
+              <label for="edit-date">Target Date <span style="color:var(--danger)">*</span></label>
+              <input id="edit-date" type="date" />
+              <div class="field-error" id="edit-date-err"></div>
+            </div>
+            <div class="form-group full">
+              <label for="edit-desc">Description <span style="color:var(--danger)">*</span></label>
+              <textarea id="edit-desc"></textarea>
+              <div class="field-error" id="edit-desc-err"></div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="edit-save-btn">
+              <span id="edit-btn-text">Save Changes</span>
+            </button>
+            <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src = "../static/js/project.js"> </script>
+  </body>
+</html>
